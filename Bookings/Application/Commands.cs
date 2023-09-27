@@ -1,6 +1,9 @@
+using Eventuous.AspNetCore.Web;
+
 namespace Bookings.Application;
 
 public static class BookingCommands {
+    // [HttpCommand]
     public record BookRoom(
         string         BookingId,
         string         GuestId,

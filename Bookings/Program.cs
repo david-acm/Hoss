@@ -47,6 +47,8 @@ app.MapControllers();
 app.UseOpenTelemetryPrometheusScrapingEndpoint();
 app.MapEventuousSpyglass(null);
 
+app.MapDiscoveredCommands<Booking>();
+
 var factory  = app.Services.GetRequiredService<ILoggerFactory>();
 var listener = new LoggingEventListener(factory, "OpenTelemetry");
 

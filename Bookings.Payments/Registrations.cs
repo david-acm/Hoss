@@ -14,41 +14,45 @@ using OpenTelemetry.Trace;
 
 namespace Bookings.Payments;
 
-public static class Registrations {
-    public static void AddServices(this IServiceCollection services, IConfiguration configuration) {
-        services.AddEventStoreClient(configuration["EventStore:ConnectionString"]!);
-        services.AddAggregateStore<EsdbEventStore>();
-        services.AddCommandService<CommandService, Payment>();
-        services.AddSingleton(Mongo.ConfigureMongo(configuration));
-        services.AddCheckpointStore<MongoCheckpointStore>();
-        services.AddEventProducer<EventStoreProducer>();
+public static class Registrations
+{
+  public static void AddServices(this IServiceCollection services, IConfiguration configuration)
+  {
+    services.AddEventStoreClient(configuration["EventStore:ConnectionString"]!);
+    services.AddAggregateStore<EsdbEventStore>();
+    services.AddCommandService<CommandService, Payment>();
+    services.AddCommandService<ProfileService, Profile>();
+    services.AddSingleton(Mongo.ConfigureMongo(configuration));
+    services.AddCheckpointStore<MongoCheckpointStore>();
+    services.AddEventProducer<EventStoreProducer>();
 
-        services
-            .AddGateway<AllStreamSubscription, AllStreamSubscriptionOptions, EventStoreProducer, EventStoreProduceOptions>(
-                subscriptionId: "IntegrationSubscription",
-                routeAndTransform: PaymentsGateway.Transform
-            );
-    }
+    services
+      .AddGateway<AllStreamSubscription, AllStreamSubscriptionOptions, EventStoreProducer, EventStoreProduceOptions>(
+        subscriptionId: "RegistrationSubscription",
+        routeAndTransform: Gateway.Transform
+      );
+  }
 
-    public static void AddTelemetry(this IServiceCollection services) {
-        services.AddOpenTelemetry()
-            .WithMetrics(
-                builder => builder
-                    .AddAspNetCoreInstrumentation()
-                    .AddEventuous()
-                    .AddEventuousSubscriptions()
-                    .AddPrometheusExporter()
-            );
+  public static void AddTelemetry(this IServiceCollection services)
+  {
+    services.AddOpenTelemetry()
+      .WithMetrics(
+        builder => builder
+          .AddAspNetCoreInstrumentation()
+          .AddEventuous()
+          .AddEventuousSubscriptions()
+          .AddPrometheusExporter()
+      );
 
-        services.AddOpenTelemetry()
-            .WithTracing(
-                builder => builder
-                    .AddAspNetCoreInstrumentation()
-                    .AddGrpcClientInstrumentation()
-                    .AddEventuousTracing()
-                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("payments"))
-                    .SetSampler(new AlwaysOnSampler())
-                    .AddZipkinExporter()
-            );
-    }
+    services.AddOpenTelemetry()
+      .WithTracing(
+        builder => builder
+          .AddAspNetCoreInstrumentation()
+          .AddGrpcClientInstrumentation()
+          .AddEventuousTracing()
+          .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("payments"))
+          .SetSampler(new AlwaysOnSampler())
+          .AddZipkinExporter()
+      );
+  }
 }

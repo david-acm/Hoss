@@ -57,6 +57,13 @@ public static class Registrations {
                 .Configure(x => x.StreamName = PaymentsIntegrationHandler.Stream)
                 .AddEventHandler<PaymentsIntegrationHandler>()
         );
+        
+        services.AddSubscription<StreamPersistentSubscription, StreamPersistentSubscriptionOptions>(
+            "RegistrationIntegration",
+            builder => builder
+                .Configure(x => x.StreamName = RegistrationIntegrationHandler.Stream)
+                .AddEventHandler<RegistrationIntegrationHandler>()
+        );
     }
 
     public static void AddTelemetry(this IServiceCollection services) {
